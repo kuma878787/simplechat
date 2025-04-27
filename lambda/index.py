@@ -72,7 +72,7 @@ def lambda_handler(event, context):
                 })
         
         # === invoke_modelではなく、FastAPIにPOSTするように変更！ ===
-        fastapi_url = "https://5a5b-34-82-243-164.ngrok-free.app/generate"
+        fastapi_url = "https://d765-34-125-235-220.ngrok-free.app/generate"
         
         # promptだけを送る（conversation履歴は今回は使わない簡易版）
         user_prompt = message  # もらったmessageをそのまま送る！
