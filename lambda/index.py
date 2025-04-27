@@ -3,8 +3,6 @@ import json
 import os
 import boto3
 import re  # 正規表現モジュールをインポート
-import requests
-
 from botocore.exceptions import ClientError
 
 
@@ -71,27 +69,36 @@ def lambda_handler(event, context):
                     "content": [{"text": msg["content"]}]
                 })
         
-        # === invoke_modelではなく、FastAPIにPOSTするように変更！ ===
-        fastapi_url = "https://d765-34-125-235-220.ngrok-free.app/generate"
-        
-        # promptだけを送る（conversation履歴は今回は使わない簡易版）
-        user_prompt = message  # もらったmessageをそのまま送る！
-        
-        payload = {
-            "prompt": user_prompt,
-            "max_new_tokens": 512,
-            "do_sample": True,
-            "temperature": 0.7,
-            "top_p": 0.9
+        # invoke_model用のリクエストペイロード
+        request_payload = {
+            "messages": bedrock_messages,
+            "inferenceConfig": {
+                "maxTokens": 512,
+                "stopSequences": [],
+                "temperature": 0.7,
+                "topP": 0.9
+            }
         }
         
-        response = requests.post(fastapi_url, json=payload)
-        response.raise_for_status()  # エラーがあれば例外を出す
+        print("Calling Bedrock invoke_model API with payload:", json.dumps(request_payload))
         
-        response_body = response.json()
+        # invoke_model APIを呼び出し
+        response = bedrock_client.invoke_model(
+            modelId=MODEL_ID,
+            body=json.dumps(request_payload),
+            contentType="application/json"
+        )
         
-        # ここから先は、もとのまま使える！
-        assistant_response = response_body["generated_text"]
+        # レスポンスを解析
+        response_body = json.loads(response['body'].read())
+        print("Bedrock response:", json.dumps(response_body, default=str))
+        
+        # 応答の検証
+        if not response_body.get('output') or not response_body['output'].get('message') or not response_body['output']['message'].get('content'):
+            raise Exception("No response content from the model")
+        
+        # アシスタントの応答を取得
+        assistant_response = response_body['output']['message']['content'][0]['text']
         
         # アシスタントの応答を会話履歴に追加
         messages.append({
