@@ -38,7 +38,7 @@ def lambda_handler(event, context):
         
         # 応答を取得
         assistant_response = response_body['generated_text']
-        
+        print("Assistant response:", assistant_response)
         # 成功レスポンス
         return {
             "statusCode": 200,
