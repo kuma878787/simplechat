@@ -4,7 +4,7 @@ import urllib.request  # ★これを使う！
 import re
 
 # ngrok経由でアクセスするFastAPIサーバーのURL
-FASTAPI_URL = os.environ.get("FASTAPI_URL", "https://d28f-34-125-235-220.ngrok-free.app")  # ←ここは自分のngrok URLに書き換える！
+FASTAPI_URL = os.environ.get("FASTAPI_URL", "https://d28f-34-125-235-220.ngrok-free.app/generate")  # ←ここは自分のngrok URLに書き換える！
 
 def lambda_handler(event, context):
     try:
